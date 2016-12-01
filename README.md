@@ -18,8 +18,33 @@ https://dmp.fabric8.io
 * Jersey
 * Cassandra
 
-### Funtional Tests
+### Functional Tests
 * Cucumber JVM
 * Guice
 * Cassandra
 * Apache Http Client
+
+## How To Run
+### Package app as docker image
+```mvn clean package```
+
+### Package app and run functional tests
+```mvn clean verify ```
+
+### Build image but do not build jar
+```cd app; mvn docker:build```
+
+### Run functional tests but do not start up containers
+```cd ft; mvn clean verify -Ddocker.skip```
+
+### Start up containers but do not run functional tests
+```cd ft; mvn docker:start```
+
+### Stop containers
+``` cd ft; mvn docker:stop```
+
+### Remove Containers
+```cd ft; mvn docker:remove```
+
+## TODO
+- [ ] integrate docker maven plugins
