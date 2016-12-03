@@ -47,4 +47,4 @@ https://dmp.fabric8.io
 ```cd ft; mvn docker:remove```
 
 ## TODO
-- [ ] integrate docker maven plugins
+- [x] integrate docker maven plugins (on branch `docker-plugin-integration`)
