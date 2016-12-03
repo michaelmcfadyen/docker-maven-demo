@@ -87,8 +87,8 @@
                         <include>**/*IT*</include>
                     </includes>
                     <systemProperties>
-                        <app.hostname>http://localhost</app.hostname>
-                        <app.port>8080</app.port>
+                        <app.hostname>http://${docker.host.address}</app.hostname>
+                        <app.port>${docker-demo.port}</app.port>
                         <cassandra.host>localhost</cassandra.host>
                         <cassandra.port>9042</cassandra.port>
                         <cassandra.keyspace>demo</cassandra.keyspace>
@@ -99,6 +99,58 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.17.2</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>docker-demo:${project.version}</name>
+                            <alias>docker-demo</alias>
+                            <run>
+                                <env>
+                                    <JAVA_OPTS>
+                                        -Dcassandra.contactpoints=172.17.0.2
+                                        -Dcassandra.port=9042
+                                        -Dcassandra.keyspace=demo
+                                    </JAVA_OPTS>
+                                </env>
+                                <ports>
+                                    <port>docker-demo.port:8080</port>
+                                    <port>docker-demo.debug.port:5005</port>
+                                </ports>
+                                <wait>
+                                    <http>
+                                        <url>http://${docker.host.address}:${docker-demo.port}</url>
+                                        <method>GET</method>
+                                        <status>200</status>
+                                    </http>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-containers</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-containers</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                            <goal>remove</goal>
                         </goals>
                     </execution>
                 </executions>
