@@ -89,8 +89,8 @@
                     <systemProperties>
                         <app.hostname>http://${docker.host.address}</app.hostname>
                         <app.port>${docker-demo.port}</app.port>
-                        <cassandra.host>localhost</cassandra.host>
-                        <cassandra.port>9042</cassandra.port>
+                        <cassandra.host>${docker.host.address}</cassandra.host>
+                        <cassandra.port>${cassandra.port}</cassandra.port>
                         <cassandra.keyspace>demo</cassandra.keyspace>
                     </systemProperties>
                 </configuration>
@@ -111,12 +111,30 @@
                 <configuration>
                     <images>
                         <image>
+                            <name>docker-demo-cassandra:1.0</name>
+                            <alias>cassandra</alias>
+                            <run>
+                                <ports>
+                                    <port>cassandra.port:9042</port>
+                                </ports>
+                                <wait>
+                                    <tcp>
+                                        <mode>mapped</mode>
+                                        <ports>
+                                            <port>9042</port>
+                                        </ports>
+                                    </tcp>
+                                    <time>30000</time>
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
                             <name>docker-demo:${project.version}</name>
                             <alias>docker-demo</alias>
                             <run>
                                 <env>
                                     <JAVA_OPTS>
-                                        -Dcassandra.contactpoints=172.17.0.2
+                                        -Dcassandra.contactpoints=cassandra
                                         -Dcassandra.port=9042
                                         -Dcassandra.keyspace=demo
                                     </JAVA_OPTS>
@@ -133,6 +151,9 @@
                                     </http>
                                     <time>60000</time>
                                 </wait>
+                                <links>
+                                    <link>cassandra</link>
+                                </links>
                             </run>
                         </image>
                     </images>
