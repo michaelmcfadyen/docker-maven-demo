@@ -111,7 +111,7 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>docker-demo-cassandra:1.0</name>
+                            <name>michaelmcfadyen/docker-demo-cassandra:1.0</name>
                             <alias>cassandra</alias>
                             <run>
                                 <ports>
