@@ -24,6 +24,12 @@ https://dmp.fabric8.io
 * Cassandra
 * Apache Http Client
 
+### Docker-Demo-Cassandra image
+The docker-demo-cassandra image uses the spotify cassandra docker image (https://github.com/spotify/docker-cassandra) as a base and preloads the schema found under ft/resource.
+
+Below is a link to the docker hub page where the cassandra image used for this project is hosted.
+https://hub.docker.com/r/michaelmcfadyen/docker-demo-cassandra/
+
 ## How To Run
 ### Package app as docker image
 ```mvn clean package```
