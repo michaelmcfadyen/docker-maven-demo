@@ -31,6 +31,9 @@ https://dmp.fabric8.io
 ### Package app and run functional tests
 ```mvn clean verify ```
 
+### Package app and run functional tests + show container logs, helpful to debug issues
+```mvn clean verify -Ddocker.showLogs```
+
 ### Build image but do not build jar
 ```cd app; mvn docker:build```
 
