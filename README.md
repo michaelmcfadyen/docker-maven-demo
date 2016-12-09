@@ -1,5 +1,7 @@
 # docker-maven-demo
 
+### *** Final Solution is on branch `docker-plugin-integration` ***
+
 This project is used to demo how to migrate our functional tests from running locally to runnning in docker containers
 
 There are two key maven plugins that are used to accomplish this. 
