@@ -13,6 +13,8 @@
 
     <properties>
         <cucumber.version>1.2.3</cucumber.version>
+        <cassandra.default.port>9042</cassandra.default.port>
+        <app.default.port>8080</app.default.port>
     </properties>
 
     <dependencies>
@@ -111,21 +113,40 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>michaelmcfadyen/docker-demo-cassandra:1.0</name>
+                            <name>spotify/cassandra</name>
                             <alias>cassandra</alias>
                             <run>
                                 <ports>
-                                    <port>cassandra.port:9042</port>
+                                    <port>cassandra.port:${cassandra.default.port}</port>
+                                    <port>cassandra.thrift.port:9160</port>
                                 </ports>
                                 <wait>
-                                    <tcp>
-                                        <mode>mapped</mode>
-                                        <ports>
-                                            <port>9042</port>
-                                        </ports>
-                                    </tcp>
+                                    <log>Listening for thrift clients...</log>
                                     <time>30000</time>
                                 </wait>
+                            </run>
+                        </image>
+                        <!-- Use this image to migrate schema -->
+                        <image>
+                            <name>cassandra-migrator</name>
+                            <alias>cassandra-migrator</alias>
+                            <build>
+                                <from>spotify/cassandra</from>
+                                <entryPoint>cqlsh -f /schema/schema.cql $HOST $PORT</entryPoint>
+                            </build>
+                            <run>
+                                <env>
+                                    <HOST>cassandra</HOST>
+                                    <PORT>9160</PORT>
+                                </env>
+                                <volumes>
+                                    <bind>
+                                        <volume>${project.basedir}/src/test/resources:/schema</volume>
+                                    </bind>
+                                </volumes>
+                                <links>
+                                    <link>cassandra</link>
+                                </links>
                             </run>
                         </image>
                         <image>
@@ -135,12 +156,13 @@
                                 <env>
                                     <JAVA_OPTS>
                                         -Dcassandra.contactpoints=cassandra
-                                        -Dcassandra.port=9042
+                                        -Dcassandra.port=${cassandra.default.port}
                                         -Dcassandra.keyspace=demo
+                                        -Dserver.port=${app.default.port}
                                     </JAVA_OPTS>
                                 </env>
                                 <ports>
-                                    <port>docker-demo.port:8080</port>
+                                    <port>docker-demo.port:${app.default.port}</port>
                                     <port>docker-demo.debug.port:5005</port>
                                 </ports>
                                 <wait>
