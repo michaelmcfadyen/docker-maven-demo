@@ -30,7 +30,7 @@ public class StatusStepDefs {
     private final ObjectMapper objectMapper;
 
     private HttpResponse response;
-    private Person expectedPerson;
+    private Person expectedPerson = new Person();
 
     @Inject
     public StatusStepDefs(@Named("app.hostname") String hostname,

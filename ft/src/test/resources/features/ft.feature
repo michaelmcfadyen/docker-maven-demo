@@ -16,3 +16,7 @@ Feature: Tests
     When I get the person
     Then response code is 200
     And the person details are correct
+
+  Scenario: Test get person returns 404
+    When I get the person
+    Then response code is 404
