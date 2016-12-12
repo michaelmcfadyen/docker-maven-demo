@@ -1,7 +1,5 @@
 # docker-maven-demo
 
-### *** Final Solution is on branch `docker-plugin-integration` ***
-
 This project is used to demo how to migrate our functional tests from running locally to runnning in docker containers
 
 There are two key maven plugins that are used to accomplish this. 
@@ -25,12 +23,6 @@ https://dmp.fabric8.io
 * Guice
 * Cassandra
 * Apache Http Client
-
-### Docker-Demo-Cassandra image
-The docker-demo-cassandra image uses the spotify cassandra docker image (https://github.com/spotify/docker-cassandra) as a base and preloads the schema found under ft/resource.
-
-Below is a link to the docker hub page where the cassandra image used for this project is hosted.
-https://hub.docker.com/r/michaelmcfadyen/docker-demo-cassandra/
 
 ## How To Run
 ### Package app as docker image
