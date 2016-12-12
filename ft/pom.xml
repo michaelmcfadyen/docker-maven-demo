@@ -13,6 +13,8 @@
 
     <properties>
         <cucumber.version>1.2.3</cucumber.version>
+        <cassandra.default.port>9042</cassandra.default.port>
+        <app.default.port>8080</app.default.port>
     </properties>
 
     <dependencies>
@@ -87,10 +89,10 @@
                         <include>**/*IT*</include>
                     </includes>
                     <systemProperties>
-                        <app.hostname>http://localhost</app.hostname>
-                        <app.port>8080</app.port>
-                        <cassandra.host>localhost</cassandra.host>
-                        <cassandra.port>9042</cassandra.port>
+                        <app.hostname>http://${docker.host.address}</app.hostname>
+                        <app.port>${docker-demo.port}</app.port>
+                        <cassandra.host>${docker.host.address}</cassandra.host>
+                        <cassandra.port>${cassandra.port}</cassandra.port>
                         <cassandra.keyspace>demo</cassandra.keyspace>
                     </systemProperties>
                 </configuration>
@@ -99,6 +101,99 @@
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.17.2</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>spotify/cassandra</name>
+                            <alias>cassandra</alias>
+                            <run>
+                                <ports>
+                                    <port>cassandra.port:${cassandra.default.port}</port>
+                                    <port>cassandra.thrift.port:9160</port>
+                                </ports>
+                                <wait>
+                                    <log>Listening for thrift clients...</log>
+                                    <time>30000</time>
+                                </wait>
+                            </run>
+                        </image>
+                        <!-- Use this image to migrate schema -->
+                        <image>
+                            <name>cassandra-migrator</name>
+                            <alias>cassandra-migrator</alias>
+                            <build>
+                                <from>spotify/cassandra</from>
+                                <entryPoint>cqlsh -f /schema/schema.cql $HOST $PORT</entryPoint>
+                            </build>
+                            <run>
+                                <env>
+                                    <HOST>cassandra</HOST>
+                                    <PORT>9160</PORT>
+                                </env>
+                                <volumes>
+                                    <bind>
+                                        <volume>${project.basedir}/src/test/resources:/schema</volume>
+                                    </bind>
+                                </volumes>
+                                <links>
+                                    <link>cassandra</link>
+                                </links>
+                            </run>
+                        </image>
+                        <image>
+                            <name>docker-demo:${project.version}</name>
+                            <alias>docker-demo</alias>
+                            <run>
+                                <env>
+                                    <JAVA_OPTS>
+                                        -Dcassandra.contactpoints=cassandra
+                                        -Dcassandra.port=${cassandra.default.port}
+                                        -Dcassandra.keyspace=demo
+                                        -Dserver.port=${app.default.port}
+                                    </JAVA_OPTS>
+                                </env>
+                                <ports>
+                                    <port>docker-demo.port:${app.default.port}</port>
+                                    <port>docker-demo.debug.port:5005</port>
+                                </ports>
+                                <wait>
+                                    <http>
+                                        <url>http://${docker.host.address}:${docker-demo.port}</url>
+                                        <method>GET</method>
+                                        <status>200</status>
+                                    </http>
+                                    <time>60000</time>
+                                </wait>
+                                <links>
+                                    <link>cassandra</link>
+                                </links>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-containers</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-containers</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                            <goal>remove</goal>
                         </goals>
                     </execution>
                 </executions>
